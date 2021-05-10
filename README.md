@@ -1,2 +1,60 @@
 # dio_retry
-Retry interceptor for dio.
+
+A plugin for [dio](https://pub.dev/packages/dio) that retries failed requests.
+
+## Usage
+
+```dart
+import 'package:dio_retry/dio_retry.dart';
+```
+
+#### Basic configuration
+
+```dart
+final dio = Dio()
+  ..interceptors.add(RetryInterceptor());
+```
+
+#### Global retry options
+
+```dart
+final dio = Dio()
+  ..interceptors.add(RetryInterceptor(
+    options: const RetryOptions(
+      retries: 3, // Number of retries before a failure
+      retryInterval: const Duration(seconds: 1), // Interval between each retry
+      retryEvaluator: (error) => error.type != DioErrorType.CANCEL && error.type != DioErrorType.RESPONSE, // Evaluating if a retry is necessary regarding the error. It is a good candidate for updating authentication token in case of a unauthorized error (be careful with concurrency though)
+    )
+  )
+);
+```
+
+#### Sending a request with options
+
+```dart
+final response = await dio.get("http://www.flutter.dev", options: Options(
+    extra: RetryOptions(
+      retryInterval: const Duration(seconds: 10),
+    ).toExtra(),
+  ));
+```
+
+
+#### Sending a request without retry
+
+```dart
+final response = await dio.get("http://www.flutter.dev", options: Options(
+    extra: RetryOptions.noRetry().toExtra(),
+  ));
+```
+
+#### Logging retry operations
+
+```dart
+final dio = Dio()
+  ..interceptors.add(RetryInterceptor(logger: Logger("Retry")));
+```
+
+## Features and bugs
+
+Please file issues.
