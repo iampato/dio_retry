@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:logging/logging.dart';
+import 'package:logger/logger.dart';
 
 import 'options.dart';
 
@@ -28,9 +28,10 @@ class RetryInterceptor extends Interceptor {
         ..addAll(extra.toExtra());
 
       try {
-        logger?.warning(
-            "[${err.requestOptions.uri}] An error occured during request, "
-            "trying a again (remaining tries: ${extra.retries}, error: ${err.error})");
+        logger?.w(
+          '[${err.requestOptions.uri}] An error occured during request, '
+          'trying a again (remaining tries: ${extra.retries}, error: ${err.error})',
+        );
         // We retry with the updated options
         return handler.resolve(Response(
           // err.request.path,
