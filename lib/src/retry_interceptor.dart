@@ -14,23 +14,20 @@ class RetryInterceptor extends Interceptor {
 
   @override
   Future<void> onError(DioError err, handler) async {
-    var extra = RetryOptions.fromExtra(err.requestOptions);
+    var currentCycle = 0;
+    var retryCount = options.retries;
 
-    var shouldRetry = extra.retries > 0 && await extra.retryEvaluator(err);
+    var shouldRetry = retryCount > 0 && retryCount > currentCycle;
     if (shouldRetry) {
-      if (extra.retryInterval.inMilliseconds > 0) {
-        await Future.delayed(extra.retryInterval);
-      }
+      await Future.delayed(options.retryInterval);
 
       // Update options to decrease retry count before new try
-      extra = extra.copyWith(retries: extra.retries - 1);
-      err.requestOptions.extra = err.requestOptions.extra
-        ..addAll(extra.toExtra());
+      currentCycle = currentCycle + 1;
 
       try {
         logger?.w(
           '[${err.requestOptions.uri}] An error occured during request, '
-          'trying a again (remaining tries: ${extra.retries}, error: ${err.error})',
+          'trying a again (remaining tries: ${retryCount - currentCycle}, error: ${err.error})',
         );
         // We retry with the updated options
         return handler.resolve(Response(
