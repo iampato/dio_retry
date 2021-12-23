@@ -9,8 +9,11 @@ class RetryInterceptor extends Interceptor {
   final Logger? logger;
   final RetryOptions options;
 
-  RetryInterceptor({required this.dio, this.logger, RetryOptions? options})
-      : options = options ?? const RetryOptions();
+  RetryInterceptor({
+    required this.dio,
+    this.logger,
+    RetryOptions? options,
+  }) : options = options ?? const RetryOptions();
 
   @override
   Future<void> onError(DioError err, handler) async {
